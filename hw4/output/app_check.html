@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Campus Customs — app check</title>
+    <style>
+      :root {
+        --blue: #00356b;
+        --deep: #001b3a;
+        --brass: #c8a951;
+        --cream: #f7f5ef;
+        --line: #e0dcd2;
+        --ink: #16202f;
+        --muted: #5c6a80;
+      }
+      * { box-sizing: border-box; }
+      body {
+        background: var(--cream);
+        color: var(--ink);
+        font: 16px/1.6 "Segoe UI", system-ui, -apple-system, sans-serif;
+        margin: 0;
+        padding: 0 20px 80px;
+      }
+      .wrap { margin: 0 auto; max-width: 1000px; }
+      header {
+        border-bottom: 3px solid var(--blue);
+        margin-bottom: 36px;
+        padding: 48px 0 26px;
+      }
+      h1 { font-size: 34px; letter-spacing: -0.02em; margin: 0 0 8px; }
+      .sub { color: var(--muted); margin: 0; }
+      .facts {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        display: grid;
+        gap: 10px 28px;
+        grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+        margin: 24px 0 0;
+        padding: 18px 20px;
+      }
+      .facts div span { color: var(--muted); display: block; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; }
+      section {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        margin-bottom: 30px;
+        overflow: hidden;
+      }
+      section > div { padding: 22px 26px 26px; }
+      h2 {
+        background: var(--blue);
+        color: #fff;
+        font-size: 19px;
+        margin: 0;
+        padding: 14px 26px;
+      }
+      h2 small { color: var(--brass); display: block; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; }
+      figure { margin: 0 0 14px; }
+      img {
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        display: block;
+        width: 100%;
+      }
+      figcaption { color: var(--muted); font-size: 14px; margin-top: 10px; }
+      .proves { border-left: 3px solid var(--brass); margin: 0; padding: 4px 0 4px 14px; }
+      table { border-collapse: collapse; font-size: 14px; margin-top: 14px; width: 100%; }
+      th, td { border-bottom: 1px solid var(--line); padding: 7px 10px; text-align: left; }
+      th { color: var(--muted); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; }
+      code { background: var(--cream); border-radius: 4px; font-size: 13px; padding: 1px 5px; }
+      .zero { color: #9b2226; font-weight: 600; }
+      footer { color: var(--muted); font-size: 14px; padding-top: 10px; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <h1>Campus Customs — site test</h1>
+        <p class="sub">
+          Six checks run against the live site, driven end to end in Chrome by
+          <code>frontend/scripts/capture_app_check.mjs</code>. Every screenshot below is one of those runs.
+        </p>
+        <div class="facts">
+          <div><span>Front end</span> Vite + React + TypeScript, http://localhost:5173</div>
+          <div><span>Back end</span> FastAPI, <code>uvicorn main:app --reload --port 8000</code></div>
+          <div><span>Agent</span> PydanticAI, gpt-4o-mini via Portkey</div>
+          <div><span>Database</span> data/campus_customs.db — 102 products, 612 stock rows</div>
+        </div>
+      </header>
+
+      <section>
+        <h2><small>Check 1 — required</small>Chat checking the inventory level of an item</h2>
+        <div>
+          <figure>
+            <img src="app_check_images/chat_inventory.png" alt="Chat answering a size question on the Yale pullover hoodie product page" />
+            <figcaption>
+              Product page for item #17 open, the shopper asks “do you have this in M?” in the panel at
+              the bottom right.
+            </figcaption>
+          </figure>
+          <p class="proves">
+            The assistant answers “The Yale pullover hoodie is out of stock in M. It’s currently
+            available in S, L, and XL.” It knew which product “this” meant from the page context, and
+            the answer came from the <code>inventory</code> table — the “from our stock list” tag under
+            the bubble is set only when a tool supplied the facts.
+          </p>
+          <table>
+            <thead>
+              <tr><th>Size</th><th>quantity in campus_customs.db</th><th>What the chat said</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>XS</td><td class="zero">0</td><td>not offered</td></tr>
+              <tr><td>S</td><td>5</td><td>available</td></tr>
+              <tr><td>M</td><td class="zero">0</td><td>out of stock</td></tr>
+              <tr><td>L</td><td>9</td><td>available</td></tr>
+              <tr><td>XL</td><td>7</td><td>available</td></tr>
+              <tr><td>XXL</td><td class="zero">0</td><td>not offered</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section>
+        <h2><small>Check 2 — required</small>Dynamic search-result cards after a category question</h2>
+        <div>
+          <figure>
+            <img src="app_check_images/chat_search_cards.png" alt="Chat panel showing product cards after the question about hoodies" />
+            <figcaption>
+              A guest asks “what hoodies do you have?” from the Products page; the reply arrives with
+              product cards rendered underneath it.
+            </figcaption>
+          </figure>
+          <p class="proves">
+            This is the Problem 7 contract working: the agent called <code>search_products</code>, returned
+            structured matches in <code>ShopReply.products</code>, and the front end drew them with the same
+            tile component the grid uses. Every card was re-read from the database by
+            <code>product_id</code> before rendering, and clicking one opens that item’s single-item page.
+          </p>
+        </div>
+      </section>
+
+      <section>
+        <h2><small>Check 3 — required</small>Usability feature: filters, sort and skeletons</h2>
+        <div>
+          <figure>
+            <img src="app_check_images/usability_filters.png" alt="Products page filtered to hoodies matching navy" />
+            <figcaption>
+              Products page with “navy” typed into the search box and the <strong>Hoodie</strong> category
+              chip selected: 24 items, all hoodies.
+            </figcaption>
+          </figure>
+          <p class="proves">
+            Improvement 1 from <code>usability.md</code>. The search is debounced by 220 ms and the grid shows
+            shimmering skeleton tiles while the request is in flight, so a 102-product catalogue stays
+            navigable and the page never flashes blank. Category, sort and “in stock only” all narrow the
+            same result set.
+          </p>
+        </div>
+      </section>
+
+      <section>
+        <h2><small>Check 4</small>Single-item page with real per-size stock</h2>
+        <div>
+          <figure>
+            <img src="app_check_images/product_detail_sizes.png" alt="Product detail page with sold-out sizes struck through" />
+            <figcaption>
+              Item #17: large image on one side, full product text on the other, and a size row built from
+              the inventory table.
+            </figcaption>
+          </figure>
+          <p class="proves">
+            XS, M and XXL are struck through and unclickable because their quantity is zero; S is selected
+            and the line under the row reads “5 in stock in S.” This is the page that both a grid tile and a
+            chat card open, and it is where the agent gets its page context from.
+          </p>
+        </div>
+      </section>
+
+      <section>
+        <h2><small>Check 5</small>Signed-in shopper: chat history reloads from the database</h2>
+        <div>
+          <figure>
+            <img src="app_check_images/login_memory.png" alt="Chat after signing in, recalling an earlier message" />
+            <figcaption>
+              Signed in as the test account, the shopper says they wear a large. The whole site is then
+              reloaded, and they ask “what size did I say I wear?”
+            </figcaption>
+          </figure>
+          <p class="proves">
+            The transcript above the new question was re-read from <code>chat_messages</code> after the reload,
+            not held in the browser, and the agent answers “You said you wear a large (L).” The header shows
+            “Signed in as Test”, which is the customer identity the agent receives in its deps.
+          </p>
+        </div>
+      </section>
+
+      <section>
+        <h2><small>Check 6</small>Storefront home</h2>
+        <div>
+          <figure>
+            <img src="app_check_images/home.png" alt="Campus Customs home page" />
+            <figcaption>Home page: hero, the three shop promises, and the featured row pulled live from the catalogue.</figcaption>
+          </figure>
+          <p class="proves">
+            The nav links to Home, Products, About Us, Log in and Create account, and the chat launcher sits
+            in the bottom right on every page.
+          </p>
+        </div>
+      </section>
+
+      <footer>
+        Re-run these checks with both servers up:
+        <code>cd frontend &amp;&amp; node scripts/capture_app_check.mjs</code>. Each run overwrites the images in
+        <code>output/app_check_images/</code> and appends to <code>output/audit_trail.json</code>.
+      </footer>
+    </div>
+  </body>
+</html>
