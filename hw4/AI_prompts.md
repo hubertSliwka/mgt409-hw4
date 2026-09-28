@@ -22,12 +22,6 @@ My vibe coder for this course is **OpenAI Codex, Luna model**.
 
 > Before we nuild anythign go look at data/campus_customs and tell me whats in it I need to kow every table and field like catalogue, inventory, users then start on ouput/hanress.md and write the tables out with one line per field on wy that field matters either the shop page or the chatbot. Not just the sqlite type. This file is gonna keep growing fyi
 
-**Follow-up**
-
-> ok I finally got the real `data.zip` off canvas, its in my downloads. unzip it into `hw4/data` and make the whole thing run on THEIR database, dont rebuild it from my seed. their `product_id` is a slug not a number and the colums are named diffrent, theres `garment_type` and `colors` and `search_tags` and `image_file_path`, and there are already chat rows and users in there so dont wipe anythign
-
-**What was lacking after the first prompt:** the mapping only covered the column names I had guessed at, so the real pack came in with string ids and JSON colour lists that nothing was expecting.
-
 ---
 
 ## Problem 3: Build the Campus Customs website
@@ -35,12 +29,6 @@ My vibe coder for this course is **OpenAI Codex, Luna model**.
 **What I typed**
 
 > now build the actual site. vite + react + typescript in `frontend/`. nav bar at the top with Home, Products, About Us, Log in, Create account. Home and About Us shoudl sound like a real campus print shop in new haven, look at yalebulldogblue.com for the vibe but WRITE IT URSELF, dont copy their sentences. the Products page pulls the products out of the database with the image, name, price and a short bit of text, and every product opens its own page with the big image on one side and all the info on the other. also put a chat thing in the bottom right corner, it doesnt have to talk to the agent yet just stub it. and spin up a small fastapi in `backend/main.py` to serve the products and the images so the front end has somethign to call.
-
-**Follow-up**
-
-> I dont have the product photos or the db on this machine, can u make a script that builds a local `data/campus_customs.db` and placeholder images from the catalogue json I have, so I cna actually see the site now and swap the real pack in later without changing code
-
-**What was lacking after the first prompt:** nothing rendered at all, there was no database to render from.
 
 ---
 
@@ -163,9 +151,3 @@ My vibe coder for this course is **OpenAI Codex, Luna model**.
 **What I typed**
 
 > last one. everything lives in a folder called `hw4` and it goes up to a PUBLIC github repo, and I submit the repo link on canvas, no zip this time. the real `.env`, `campus_customs.db` and the product images do NOT go up, put them in `.gitignore` and leave a `.env.example` with placeholders. `README.md` has to explain how to run the front end and the back end after someone drops the data pack in.
-
-**Follow-up**
-
-> check the ignore is actually working before we push, I do not want that api key on github
-
-**What was lacking after the first prompt:** `git status` still had `.env` and the `data/` folder showing as untracked, they were only ignored after the ignore file was fixed.
