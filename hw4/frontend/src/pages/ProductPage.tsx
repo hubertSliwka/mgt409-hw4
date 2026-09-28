@@ -14,12 +14,11 @@ export function ProductPage() {
   const { setContext, openChat } = usePageContext();
 
   useEffect(() => {
-    const id = Number(productId);
-    if (!Number.isFinite(id)) return;
+    if (!productId) return;
     setProduct(null);
     setSize("");
     api
-      .getProduct(id)
+      .getProduct(productId)
       .then((detail) => {
         setProduct(detail);
         setContext({ page: "product", product_id: detail.product_id, product_name: detail.name });
@@ -72,7 +71,7 @@ export function ProductPage() {
         </div>
 
         <div className="detail__body">
-          <p className="eyebrow">{product.category}</p>
+          <p className="eyebrow">{product.garment_type || product.category}</p>
           <h1>{product.name}</h1>
           <p className="detail__price">${product.price.toFixed(2)}</p>
           <p className="detail__text">{product.description}</p>
@@ -91,8 +90,8 @@ export function ProductPage() {
               </div>
             )}
             <div>
-              <dt>Item</dt>
-              <dd>#{product.product_id}</dd>
+              <dt>Item code</dt>
+              <dd className="code">{product.product_id}</dd>
             </div>
           </dl>
 

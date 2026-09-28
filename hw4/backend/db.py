@@ -15,6 +15,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from functools import lru_cache
 from pathlib import Path
+import json
 from typing import Any, Iterable, Iterator
 
 BACKEND_DIR = Path(__file__).resolve().parent
@@ -33,9 +34,10 @@ CATALOGUE_COLUMNS = {
     "name": ("name", "title", "product_name", "item_name"),
     "price": ("price", "price_usd", "unit_price", "retail_price", "cost"),
     "description": ("description", "design_description", "product_description", "details", "long_description"),
-    "image": ("image_path", "image", "image_url", "image_file", "photo", "picture"),
-    "category": ("category", "product_type", "type", "collection"),
-    "color": ("primary_color", "color", "colour"),
+    "image": ("image_file_path", "image_path", "image", "image_url", "image_file", "photo", "picture"),
+    "category": ("garment_type", "category", "product_type", "type", "collection"),
+    "color": ("colors", "primary_color", "color", "colour"),
+    "tags": ("search_tags", "tags", "keywords"),
     "material": ("material", "fabric"),
 }
 
@@ -53,6 +55,40 @@ USER_COLUMNS = {
     "last_name": ("last_name", "lastname", "surname", "family_name", "lname"),
     "created_at": ("created_at", "created", "signup_date", "date_joined"),
 }
+
+
+# Packs spell the garment type freely ("short-sleeve T-shirt", "hooded pullover sweatshirt").
+# These rules fold those into the handful of families the shop filters by.
+FAMILY_RULES = (
+    ("quarter-zip", "quarter-zip"),
+    ("1/4 zip", "quarter-zip"),
+    ("hood", "hoodie"),
+    ("crew", "crewneck"),
+    ("mockneck", "crewneck"),
+    ("jacket", "jacket"),
+    ("fleece", "jacket"),
+    ("vest", "jacket"),
+    ("t-shirt", "t-shirt"),
+    ("tee", "t-shirt"),
+    ("polo", "shirt"),
+    ("shirt", "shirt"),
+    ("sweatshirt", "crewneck"),
+    ("sweater", "crewneck"),
+    ("hat", "accessory"),
+    ("cap", "accessory"),
+    ("beanie", "accessory"),
+)
+
+FAMILY_FALLBACK = "apparel"
+
+
+def family(*parts: str) -> str:
+    """Fold a free-text garment type into one shopping category."""
+    text = " ".join(part or "" for part in parts).lower()
+    for needle, name in FAMILY_RULES:
+        if needle in text:
+            return name
+    return FAMILY_FALLBACK
 
 
 class SchemaError(RuntimeError):
@@ -82,6 +118,8 @@ class Schema:
     inventory: TableMap | None
     users: TableMap | None
     chat_table: str
+    chat_key: str
+    required_user_columns: tuple[str, ...] = ()
 
 
 def db_path() -> Path:
@@ -155,8 +193,34 @@ def schema() -> Schema:
         users = map_columns(connection, user_table, USER_COLUMNS) if user_table else None
 
         chat_table = pick_table(names, CHAT_TABLES) or "chat_messages"
+        chat_key = primary_key(connection, chat_table) or "rowid"
+        required = required_columns(connection, user_table) if user_table else ()
 
-    return Schema(catalogue=catalogue, inventory=inventory, users=users, chat_table=chat_table)
+    return Schema(
+        catalogue=catalogue,
+        inventory=inventory,
+        users=users,
+        chat_table=chat_table,
+        chat_key=chat_key,
+        required_user_columns=required,
+    )
+
+
+def primary_key(connection: sqlite3.Connection, table: str) -> str | None:
+    """Order chat history by the table's own key: packs spell it id, message_id, ..."""
+    for row in connection.execute(f'PRAGMA table_info("{table}")'):
+        if row["pk"]:
+            return row["name"]
+    return None
+
+
+def required_columns(connection: sqlite3.Connection, table: str) -> tuple[str, ...]:
+    """NOT NULL columns with no default, which an INSERT has to fill itself."""
+    return tuple(
+        row["name"]
+        for row in connection.execute(f'PRAGMA table_info("{table}")')
+        if row["notnull"] and row["dflt_value"] is None and not row["pk"]
+    )
 
 
 def ensure_support_tables() -> None:
@@ -196,6 +260,23 @@ def image_filename(raw: object) -> str:
     return text.rsplit("/", 1)[-1]
 
 
+def text_list(raw: object) -> list[str]:
+    """Some packs store colours and tags as a JSON array in a TEXT column."""
+    if raw is None:
+        return []
+    if isinstance(raw, (list, tuple)):
+        return [str(item).strip() for item in raw if str(item).strip()]
+    text = str(raw).strip()
+    if text.startswith("["):
+        try:
+            loaded = json.loads(text)
+        except json.JSONDecodeError:
+            loaded = []
+        if isinstance(loaded, list):
+            return [str(item).strip() for item in loaded if str(item).strip()]
+    return [part.strip() for part in text.split(",") if part.strip()]
+
+
 def product_row(row: sqlite3.Row, table: TableMap) -> dict[str, Any]:
     keys = row.keys()
 
@@ -204,13 +285,19 @@ def product_row(row: sqlite3.Row, table: TableMap) -> dict[str, Any]:
         return row[name] if name in keys else None
 
     price = value("price")
+    colors = text_list(value("color"))
+    name = str(value("name") or "Campus Customs item")
+    garment_type = str(value("category") or "").strip()
     return {
-        "product_id": int(value("id")),
-        "name": str(value("name") or "Campus Customs item"),
+        "product_id": str(value("id")),
+        "name": name,
         "price": round(float(price), 2) if price is not None else 0.0,
         "description": str(value("description") or "").strip(),
-        "category": str(value("category") or "apparel"),
-        "color": str(value("color") or ""),
+        "garment_type": garment_type,
+        "category": family(garment_type, name),
+        "color": ", ".join(colors),
+        "colors": colors,
+        "tags": text_list(value("tags")),
         "material": str(value("material") or ""),
         "image": image_filename(value("image")),
     }
@@ -232,7 +319,7 @@ def all_products(limit: int | None = None) -> list[dict[str, Any]]:
     return [product_row(row, TableMap(current.table, {role: role for role in roles})) for row in rows]
 
 
-def product_by_id(product_id: int) -> dict[str, Any] | None:
+def product_by_id(product_id: str) -> dict[str, Any] | None:
     current = schema().catalogue
     roles = [role for role in CATALOGUE_COLUMNS if current.has(role)]
     query = (
@@ -240,13 +327,13 @@ def product_by_id(product_id: int) -> dict[str, Any] | None:
         f'WHERE "{current.table}"."{current.column("id")}" = ?'
     )
     with session() as connection:
-        row = connection.execute(query, (product_id,)).fetchone()
+        row = connection.execute(query, (str(product_id),)).fetchone()
     if row is None:
         return None
     return product_row(row, TableMap(current.table, {role: role for role in roles}))
 
 
-def stock_for(product_id: int) -> list[dict[str, Any]]:
+def stock_for(product_id: str) -> list[dict[str, Any]]:
     """Return per-size stock, or an empty list when the pack has no inventory table."""
     current = schema()
     inventory = current.inventory
@@ -257,7 +344,7 @@ def stock_for(product_id: int) -> list[dict[str, Any]]:
         f'FROM "{inventory.table}" WHERE "{inventory.column("product")}" = ?'
     )
     with session() as connection:
-        rows = connection.execute(query, (product_id,)).fetchall()
+        rows = connection.execute(query, (str(product_id),)).fetchall()
     order = {"XS": 0, "S": 1, "M": 2, "L": 3, "XL": 4, "XXL": 5, "2XL": 5, "3XL": 6}
     sizes = [{"size": str(row["size"]), "quantity": int(row["quantity"] or 0)} for row in rows]
     return sorted(sizes, key=lambda item: order.get(item["size"].upper(), 99))

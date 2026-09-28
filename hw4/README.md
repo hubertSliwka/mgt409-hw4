@@ -45,10 +45,11 @@ hw4/data/
 
 ## Run it
 
-**1. Put the data pack in place.** Copy the course `campus_customs.db` to `hw4/data/` and the
-product images to `hw4/data/products/`. The backend resolves the table and column names at
-startup, so a pack that spells its columns differently still works — `GET /api/health` prints
-what it found.
+**1. Put the data pack in place.** Unzip the course `data.zip` inside `hw4/`, so you end up
+with `hw4/data/campus_customs.db` and `hw4/data/products/`. The backend resolves table and
+column names at startup from `PRAGMA table_info`, which is how it reads this pack's
+`product_id` slugs, `garment_type`, JSON `colors` and `search_tags`, and `image_file_path`
+without any of those being hardcoded — `GET /api/health` prints what it found.
 
 No pack on this machine? Build a development copy instead:
 
@@ -59,7 +60,8 @@ python scripts/seed_dev_data.py --data-dir data
 
 It writes the same four tables (`catalogue`, `inventory`, `users`, `chat_messages`) from
 `data/catalogue_seed.json` and draws a placeholder image per product, so every page and the
-agent work end to end. Drop the real database in afterwards and it is used instead.
+agent work end to end. Drop the real pack in afterwards and it is used instead — the backend
+adapts to whichever one is there.
 
 **2. Environment.** Copy `.env.example` to `.env` and set `PORTKEY_API_KEY` (or
 `OPENAI_API_KEY`) and a `SESSION_SECRET`.
@@ -83,16 +85,17 @@ Open http://localhost:5173. The Vite dev server proxies `/api` to port 8000.
 
 ## Accounts
 
-The seeded pack includes `test@campuscustoms.yale.edu` / `password`. Creating an account
-through the form works the same way; passwords are stored as bcrypt digests and the login
-returns a signed 12-hour session token.
+The pack ships `test@campuscustoms.yale.edu` / `password`, stored as a PBKDF2-SHA256 digest.
+Login accepts that format and leaves it untouched. Accounts created through the form are
+hashed with bcrypt. Either way the login returns a signed 12-hour session token, and no
+password is ever stored in a readable form.
 
 ## Testing the agent without the browser
 
 ```
 cd backend
 python agent.py --message "what hoodies do you have?"
-python agent.py --message "do you have this in M?" --product-id 17 --email test@campuscustoms.yale.edu
+python agent.py --message "do you have this in M?" --product-id crew-left-chest-hoodie --email test@campuscustoms.yale.edu
 ```
 
 ## Re-running the site test

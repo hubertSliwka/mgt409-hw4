@@ -14,7 +14,7 @@ from pydantic import BaseModel, EmailStr, Field
 class ProductCard(BaseModel):
     """One product tile. Same shape whether the page or the chat produced it."""
 
-    product_id: int = Field(description="Catalogue id, used by the front end to open the detail page.")
+    product_id: str = Field(description="Catalogue id, used by the front end to open the detail page.")
     name: str
     price: float = Field(ge=0, description="Price in USD, copied from the catalogue row.")
     image: str = Field(default="", description="Image file name served from /api/images/.")
@@ -34,7 +34,7 @@ class SizeStock(BaseModel):
 class StockReport(BaseModel):
     """What the stock tool returns: enough to answer 'do you have this in M?' honestly."""
 
-    product_id: int
+    product_id: str
     name: str
     price: float = Field(ge=0)
     sizes: list[SizeStock] = Field(default_factory=list)
@@ -46,7 +46,7 @@ class StockReport(BaseModel):
 class ProductDetail(BaseModel):
     """Full product record for description and price questions."""
 
-    product_id: int
+    product_id: str
     name: str
     price: float = Field(ge=0)
     description: str = ""
@@ -73,7 +73,7 @@ class ShopReply(BaseModel):
         default_factory=list,
         description="Cards to render on the site. Empty when the question was not about specific items.",
     )
-    highlight_product_id: int | None = Field(
+    highlight_product_id: str | None = Field(
         default=None, description="Product the shopper is asking about, so the page can open it."
     )
     source: Literal["database", "general"] = Field(
@@ -92,7 +92,7 @@ class PageContext(BaseModel):
     """What the shopper is looking at, so 'do you have this in pink?' resolves."""
 
     page: str = Field(default="home", description="Route name: home, products, product, about, login, signup.")
-    product_id: int | None = Field(default=None, description="Catalogue id when a detail page is open.")
+    product_id: str | None = Field(default=None, description="Catalogue id when a detail page is open.")
     product_name: str | None = None
 
 

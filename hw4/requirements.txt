@@ -6,6 +6,4 @@ openai>=1.68.0
 python-dotenv>=1.0
 bcrypt>=4.1
 email-validator>=2.0
-
-# scripts/seed_dev_data.py only, for building a local database when the data pack is absent
 pillow>=10.0

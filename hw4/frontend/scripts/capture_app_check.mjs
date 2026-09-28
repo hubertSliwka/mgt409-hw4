@@ -18,6 +18,8 @@ const SITE = process.env.SITE_URL ?? "http://localhost:5173";
 const CHROME =
   process.env.CHROME_PATH ?? "C:/Program Files/Google/Chrome/Application/chrome.exe";
 const TEST_USER = { email: "test@campuscustoms.yale.edu", password: "password" };
+// Its M is at zero in the supplied inventory, which is what check 1 has to show.
+const DETAIL_PRODUCT = process.env.DETAIL_PRODUCT ?? "crew-left-chest-hoodie";
 const AGENT_TIMEOUT = 90_000;
 
 const wait = (ms) => new Promise((done) => setTimeout(done, ms));
@@ -124,7 +126,7 @@ async function main() {
     await shoot(page, "chat_search_cards");
 
     // 4. Product detail: size picker showing real per-size stock.
-    await page.goto(`${SITE}/products/17`, { waitUntil: "networkidle2" });
+    await page.goto(`${SITE}/products/${DETAIL_PRODUCT}`, { waitUntil: "networkidle2" });
     await page.waitForSelector(".sizes__row .size");
     await wait(500);
     await shoot(page, "product_detail_sizes");
@@ -148,16 +150,6 @@ async function main() {
         timeout: 20_000,
       }),
     ]);
-    // Start the stored transcript from empty so the screenshot shows this exchange only.
-    await page.evaluate(async () => {
-      const token = localStorage.getItem("campus_customs_token");
-      await fetch("/api/chat/clear", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-    });
-    await page.reload({ waitUntil: "networkidle2" });
-
     await openChat(page);
     await ask(page, "I wear a large and I'm after a navy crewneck for my mom");
 

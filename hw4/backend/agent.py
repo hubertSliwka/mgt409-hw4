@@ -4,7 +4,7 @@
 directly is the quick way to test one message from a terminal.
 
     python agent.py --message "what hoodies do you have?"
-    python agent.py --message "do you have this in M?" --product-id 3 --email test@campuscustoms.yale.edu
+    python agent.py --message "do you have this in M?" --product-id basic-hoodie-big-yale --email test@campuscustoms.yale.edu
 """
 
 from __future__ import annotations
@@ -117,7 +117,7 @@ def build_agent(model_name: str | None = None) -> Agent[ShopDeps, ShopReply]:
         return tools.search_catalogue(query, limit=limit, run_id=ctx.deps.run_id).model_dump()
 
     @shop_agent.tool
-    def get_product_details(ctx: RunContext[ShopDeps], query: str = "", product_id: int | None = None) -> dict:
+    def get_product_details(ctx: RunContext[ShopDeps], query: str = "", product_id: str = "") -> dict:
         """Look up one product's description, price, colour and material."""
         return tools.product_detail(
             query or None,
@@ -127,7 +127,7 @@ def build_agent(model_name: str | None = None) -> Agent[ShopDeps, ShopReply]:
 
     @shop_agent.tool
     def check_stock(
-        ctx: RunContext[ShopDeps], query: str = "", size: str = "", product_id: int | None = None
+        ctx: RunContext[ShopDeps], query: str = "", size: str = "", product_id: str = ""
     ) -> dict:
         """Check how many units of a product are in stock, by size when a size is given."""
         return tools.stock_report(
@@ -176,7 +176,7 @@ def is_content_filter(error: Exception) -> bool:
 def verify_cards(cards: list[ProductCard]) -> list[ProductCard]:
     """Re-read every card from the database so a wrong price cannot reach the page."""
     verified: list[ProductCard] = []
-    seen: set[int] = set()
+    seen: set[str] = set()
     for card in cards[:MAX_CARDS_IN_REPLY]:
         product = db.product_by_id(card.product_id)
         if product is None or card.product_id in seen:
@@ -241,7 +241,7 @@ async def answer(
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--message", required=True, help="Message to send to the shop agent.")
-    parser.add_argument("--product-id", type=int, default=None, help="Product page the shopper is on.")
+    parser.add_argument("--product-id", default=None, help="Product page the shopper is on.")
     parser.add_argument("--email", default=None, help="Sign the test message in as this account email.")
     parser.add_argument("--model", default=None, help="Override AGENT_MODEL for this run.")
     args = parser.parse_args()

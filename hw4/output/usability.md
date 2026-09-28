@@ -54,8 +54,9 @@ sending the same question three times while the first is still running.
 ### 4. Every product card is re-read from the database before it reaches the page
 
 **What I added.** `agent.verify_cards` takes the cards the model returned, looks each one up
-by `product_id`, and rebuilds the name, price, image and stock flag from the row. Cards with
-an id that does not exist are dropped, duplicates are removed, and the list is capped at six.
+by its catalogue slug, and rebuilds the name, price, image and stock flag from the row. Cards
+with an id that does not exist are dropped, duplicates are removed, and the list is capped at
+six.
 
 **Why it helps.** This is the difference between a chatbot that is usually right and a shop
 that never quotes a wrong price. The model can still phrase things its own way, but the number
@@ -68,7 +69,9 @@ the business, a hallucinated price is a refund conversation or a chargeback.
 (`tools.CATALOGUE_TTL_SECONDS`), so scoring a question does not re-read 102 rows several
 times. Search returns at most 8 rows (`tools.MAX_CARDS`) and at most 6 reach the model
 (`MAX_CARDS_IN_REPLY`); descriptions on cards are clipped to 150 characters; audit fields are
-truncated to 220. The agent object and its HTTP client are built once per process, not per
+truncated to 220. Scoring also uses each row's `search_tags` and drops anything below a match
+floor, so "what hoodies do you have?" scores the 27 hoodies rather than 66 loosely related
+sweatshirts. The agent object and its HTTP client are built once per process, not per
 request, and the audit trail records prompt and completion tokens for every run.
 
 **Why it helps.** Caps are what keep a chat reply fast and cheap: the tool result is the
@@ -93,13 +96,22 @@ counted later instead of being invisible.
 
 ---
 
+### Also shipped: product photos trimmed on the way out
+
+Most of the supplied photos are pillarboxed with black bars, which made the grid look like a
+row of dark rectangles. `main.trimmed()` drops the near-black rows and columns the first time
+a photo is requested, writes the result to a cache beside the pack, and serves that
+afterwards. A guard refuses to crop below 45% of the original area, so a dark garment shot on
+a dark backdrop is served untouched rather than cut into.
+
 ## Where to see them
 
 | Improvement | Where |
 |---|---|
 | 1. Filters, sort, skeletons | `/products` — `frontend/src/pages/Products.tsx` |
-| 2. Size picker with live counts | `/products/17` — `frontend/src/pages/ProductPage.tsx` |
+| 2. Size picker with live counts | `/products/crew-left-chest-hoodie` — `frontend/src/pages/ProductPage.tsx` |
 | 3. Chat shortcuts, chips, prefill | any page — `frontend/src/components/ChatWidget.tsx` |
 | 4. Card verification | `backend/agent.py`, `verify_cards` |
 | 5. Cache and caps | `backend/tools.py`, `backend/agent.py` |
 | 6. Safety rules and refusals | `backend/prompts/prompt.md`, `backend/agent.py` |
+| Photo trimming | `backend/main.py`, `content_box` and `trimmed` |

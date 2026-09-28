@@ -19,6 +19,9 @@ import bcrypt
 TOKEN_TTL_SECONDS = 60 * 60 * 12
 PBKDF2_ROUNDS = 240_000
 
+# The supplied pack omits the round count from its digests; 120k is the one it used.
+PBKDF2_FALLBACK_ROUNDS = (120_000, 260_000, 600_000, 390_000, 100_000, 29_000, 1_000)
+
 _secret_cache: bytes | None = None
 
 
@@ -42,6 +45,31 @@ def pbkdf2_digest(password: str, salt: str) -> str:
     return f"pbkdf2_sha256${PBKDF2_ROUNDS}${salt}${base64.b64encode(derived).decode('ascii')}"
 
 
+def verify_pbkdf2(candidate: bytes, stored: str) -> bool:
+    """Accept both PBKDF2 spellings: with an explicit round count, and the pack's without one.
+
+    The supplied database stores ``pbkdf2_sha256$<salt>$<hex digest>`` and leaves the round
+    count out, so it is tried against the counts these files are usually written with.
+    """
+    parts = stored.split("$")
+    if len(parts) == 4:
+        _, rounds, salt, expected = parts
+        candidates = [int(rounds)]
+    elif len(parts) == 3:
+        _, salt, expected = parts
+        candidates = list(PBKDF2_FALLBACK_ROUNDS)
+    else:
+        return False
+
+    for rounds in candidates:
+        derived = hashlib.pbkdf2_hmac("sha256", candidate, salt.encode("utf-8"), rounds)
+        if hmac.compare_digest(derived.hex(), expected.lower()):
+            return True
+        if hmac.compare_digest(base64.b64encode(derived).decode("ascii"), expected):
+            return True
+    return False
+
+
 def verify_password(password: str, stored: str) -> bool:
     """Accept bcrypt, PBKDF2, a hex digest, or (last resort) a plain-text seed value."""
     if not stored:
@@ -55,13 +83,7 @@ def verify_password(password: str, stored: str) -> bool:
             return False
 
     if stored.startswith("pbkdf2_sha256$"):
-        try:
-            _, rounds, salt, _ = stored.split("$", 3)
-        except ValueError:
-            return False
-        derived = hashlib.pbkdf2_hmac("sha256", candidate, salt.encode("utf-8"), int(rounds))
-        expected = stored.rsplit("$", 1)[-1]
-        return hmac.compare_digest(base64.b64encode(derived).decode("ascii"), expected)
+        return verify_pbkdf2(candidate, stored)
 
     lowered = stored.strip().lower()
     if len(lowered) == 64 and all(char in "0123456789abcdef" for char in lowered):
@@ -73,8 +95,8 @@ def verify_password(password: str, stored: str) -> bool:
 
 
 def needs_rehash(stored: str) -> bool:
-    """True when a pack stored the password in a weaker format than the one we write."""
-    return not stored.startswith(("$2a$", "$2b$", "$2y$"))
+    """True only for genuinely weak storage. A PBKDF2 digest is left exactly as the pack wrote it."""
+    return not stored.startswith(("$2a$", "$2b$", "$2y$", "pbkdf2_sha256$"))
 
 
 def issue_token(user_id: int) -> str:

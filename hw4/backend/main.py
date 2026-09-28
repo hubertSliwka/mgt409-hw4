@@ -40,6 +40,11 @@ ALLOWED_ORIGINS = (
 IMAGE_SUFFIXES = (".jpg", ".jpeg", ".png", ".webp", ".gif")
 MAX_HISTORY_MESSAGES = 40
 
+# Several supplied photos are pillarboxed with black bars. They are trimmed once and cached.
+IMAGE_CACHE = db.PROJECT_DIR / "data" / ".image_cache"
+TRIMMABLE_SUFFIXES = (".jpg", ".jpeg", ".png")
+BLACK_LEVEL = 26
+
 app = FastAPI(title="Campus Customs API", version="1.0.0")
 app.add_middleware(
     CORSMiddleware,
@@ -116,11 +121,12 @@ def save_message(user_id: int, role: str, content: str) -> None:
 
 
 def load_history(user_id: int, limit: int = MAX_HISTORY_MESSAGES) -> list[ChatMessage]:
-    table = db.schema().chat_table
+    current = db.schema()
+    table, key = current.chat_table, current.chat_key
     with db.session() as connection:
         rows = connection.execute(
             f'SELECT role, content, created_at FROM "{table}" WHERE user_id = ?'
-            " ORDER BY message_id DESC LIMIT ?",
+            f' ORDER BY "{key}" DESC LIMIT ?',
             (user_id, limit),
         ).fetchall()
     return [
@@ -160,7 +166,7 @@ def list_products(
 
 
 @app.get("/api/products/{product_id}")
-def get_product(product_id: int) -> dict[str, Any]:
+def get_product(product_id: str) -> dict[str, Any]:
     product = db.product_by_id(product_id)
     if product is None:
         raise HTTPException(status_code=404, detail="Product not found.")
@@ -172,6 +178,56 @@ def get_product(product_id: int) -> dict[str, Any]:
     }
 
 
+def content_box(rgb) -> tuple[int, int, int, int] | None:
+    """Find the picture inside a letterboxed photo by dropping near-black rows and columns.
+
+    Averaging a whole row or column first is what makes this survive the stray bright pixel
+    that a plain bounding box trips over.
+    """
+    width, height = rgb.size
+    gray = rgb.convert("L")
+    columns = list(gray.resize((width, 1)).getdata())
+    rows = list(gray.resize((1, height)).getdata())
+
+    def span(profile: list[int]) -> tuple[int, int] | None:
+        lit = [index for index, level in enumerate(profile) if level > BLACK_LEVEL]
+        return (lit[0], lit[-1] + 1) if lit else None
+
+    horizontal = span(columns)
+    vertical = span(rows)
+    if horizontal is None or vertical is None:
+        return None
+    return horizontal[0], vertical[0], horizontal[1], vertical[1]
+
+
+def trimmed(source: Path) -> Path:
+    """Return a copy with the black letterbox bars removed, building it once on first request."""
+    if source.suffix.lower() not in TRIMMABLE_SUFFIXES:
+        return source
+    cached = IMAGE_CACHE / f"{source.stem}-{int(source.stat().st_mtime)}{source.suffix}"
+    if cached.exists():
+        return cached
+    try:
+        from PIL import Image
+
+        with Image.open(source) as image:
+            rgb = image.convert("RGB")
+            box = content_box(rgb)
+            if box is None:
+                return source
+            left, top, right, bottom = box
+            if (right - left) >= rgb.width * 0.99 and (bottom - top) >= rgb.height * 0.99:
+                return source
+            # A dark garment on a dark backdrop can fool the scan; never crop away the product.
+            if (right - left) * (bottom - top) < rgb.width * rgb.height * 0.45:
+                return source
+            IMAGE_CACHE.mkdir(parents=True, exist_ok=True)
+            rgb.crop(box).save(cached, quality=90)
+        return cached
+    except Exception:  # noqa: BLE001 - a photo we cannot trim is still worth serving
+        return source
+
+
 @app.get("/api/images/{filename}")
 def get_image(filename: str) -> FileResponse:
     safe = Path(filename).name
@@ -180,7 +236,7 @@ def get_image(filename: str) -> FileResponse:
     for folder in db.PRODUCT_IMAGE_DIRS:
         candidate = db.PROJECT_DIR / folder / safe
         if candidate.exists():
-            return FileResponse(candidate, headers={"Cache-Control": "public, max-age=86400"})
+            return FileResponse(trimmed(candidate), headers={"Cache-Control": "public, max-age=86400"})
     raise HTTPException(status_code=404, detail="Image not found.")
 
 
@@ -193,12 +249,24 @@ def signup(payload: SignupRequest) -> AuthResponse:
         raise HTTPException(status_code=409, detail="That email already has an account.")
 
     digest = security.hash_password(payload.password)
+    values: dict[str, Any] = {
+        table.column("first_name"): payload.first_name,
+        table.column("last_name"): payload.last_name,
+        table.column("email"): str(payload.email).lower(),
+        table.column("password"): digest,
+    }
+    if table.has("created_at"):
+        values[table.column("created_at")] = db.utc_now()
+    # A pack may have its own NOT NULL columns, such as a single `name`. Fill them sensibly.
+    for column in db.schema().required_user_columns:
+        values.setdefault(column, f"{payload.first_name} {payload.last_name}".strip())
+
+    columns = ", ".join(f'"{name}"' for name in values)
+    placeholders = ", ".join("?" for _ in values)
     with db.session() as connection:
         cursor = connection.execute(
-            f'INSERT INTO "{table.table}"'
-            f' ("{table.column("first_name")}", "{table.column("last_name")}", "{table.column("email")}",'
-            f' "{table.column("password")}", "{table.column("created_at")}") VALUES (?, ?, ?, ?, ?)',
-            (payload.first_name, payload.last_name, str(payload.email).lower(), digest, db.utc_now()),
+            f'INSERT INTO "{table.table}" ({columns}) VALUES ({placeholders})',
+            tuple(values.values()),
         )
         connection.commit()
         user_id = int(cursor.lastrowid)

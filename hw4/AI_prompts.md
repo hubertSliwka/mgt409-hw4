@@ -34,6 +34,16 @@ My vibe coder for this course is **OpenAI Codex, Luna model**.
 
 **What was lacking after the first prompt:** the first version wrote `SELECT price` and friends straight into the queries, so the whole thing only worked against our own copy of the database.
 
+**Follow-up**
+
+> ok I finally got the real `data.zip` off canvas, its in my downloads. unzip it into `hw4/data` and make the whole thing run on THEIR database, dont rebuild it from my seed. their `product_id` is a slug not a number and the colums are named diffrent, theres `garment_type` and `colors` and `search_tags` and `image_file_path`, and there are already chat rows and users in there so dont wipe anythign
+
+**What was lacking after the first prompt:** the mapping only covered the column names I had guessed at, so the real pack came in with string ids and JSON colour lists that nothing was expecting.
+
+**Follow-up**
+
+> the category chips are showing like 22 things now because they use the raw garment type, fold them into a few real catagories but keep the exact type on the product page
+
 ---
 
 ## Problem 3: Build the Campus Customs website
@@ -68,6 +78,12 @@ My vibe coder for this course is **OpenAI Codex, Luna model**.
 
 **What was lacking after the first prompt:** it only checked bcrypt, so if the supplied pack stored that test user any other way the login they told us to use would just fail.
 
+**Follow-up**
+
+> their users are `pbkdf2_sha256$salt$hex` with no rounds in the string, work out the rounds and support that format, and do NOT re hash their rows into bcrypt, leave their file how it is. new signups can still be bcrypt
+
+**What was lacking after the first prompt:** my upgrade-on-login idea would have rewritten the course's own password rows, which is not my file to change.
+
 ---
 
 ## Problem 5: PydanticAI agent backend
@@ -95,6 +111,10 @@ My vibe coder for this course is **OpenAI Codex, Luna model**.
 > test it against an item that actually has a zero size, I want to see it say out of stock and then name the sizes that arent
 
 **What was lacking after the first prompt:** it only got tested on things that were in stock, so the honest part was never actually proven.
+
+**Follow-up**
+
+> it told me theres 66 hoodies when theres 27, thats the search score count not a real total. tighten the matching and tell it not to quote that number as a catagory count
 
 ---
 
@@ -151,6 +171,12 @@ My vibe coder for this course is **OpenAI Codex, Luna model**.
 > the chat cards are so tall that the reply text gets pushed off screen, shrink the image on the ones inside the chat panel
 
 **What was lacking after the first prompt:** the chat reused the full size product tile, so a search answer filled the whole panel and you couldnt read what it said.
+
+**Follow-up**
+
+> half the real product photos have big black bars down the sides and the grid looks broken, crop that off when u serve them but be careful, some of the hoodies are photographd dark on dark so dont go cutting into the actual garment
+
+**What was lacking after the first prompt:** the first crop used a plain bounding box and a single stray bright pixel kept the bars in, and on the dark photos it wanted to cut into the product.
 
 ---
 

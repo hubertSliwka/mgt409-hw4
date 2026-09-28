@@ -1,5 +1,5 @@
 export type ProductCard = {
-  product_id: number;
+  product_id: string;
   name: string;
   price: number;
   image: string;
@@ -14,11 +14,12 @@ export type SizeStock = {
 };
 
 export type ProductDetail = {
-  product_id: number;
+  product_id: string;
   name: string;
   price: number;
   description: string;
   category: string;
+  garment_type?: string;
   color: string;
   material: string;
   image: string;
@@ -41,14 +42,14 @@ export type ChatMessage = {
 
 export type PageContext = {
   page: string;
-  product_id?: number | null;
+  product_id?: string | null;
   product_name?: string | null;
 };
 
 export type ChatResponse = {
   reply: string;
   products: ProductCard[];
-  highlight_product_id: number | null;
+  highlight_product_id: string | null;
   source: "database" | "general";
   history: ChatMessage[];
 };

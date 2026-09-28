@@ -665,6 +665,13 @@ button.tile {
   text-transform: capitalize;
 }
 
+.detail__facts dd.code {
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 13px;
+  letter-spacing: 0.01em;
+  text-transform: none;
+}
+
 .sizes__label {
   font-size: 13px;
   font-weight: 600;

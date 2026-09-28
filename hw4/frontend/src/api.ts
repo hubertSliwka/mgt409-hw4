@@ -59,8 +59,8 @@ export function listProducts(query = "", category = ""): Promise<{
   return request(`/api/products${suffix}`);
 }
 
-export function getProduct(productId: number): Promise<ProductDetail> {
-  return request(`/api/products/${productId}`);
+export function getProduct(productId: string): Promise<ProductDetail> {
+  return request(`/api/products/${encodeURIComponent(productId)}`);
 }
 
 export function signup(payload: {

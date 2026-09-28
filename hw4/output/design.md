@@ -47,6 +47,15 @@ that it is reading the shelf, so the interface says so. Assistant bubbles are cr
 hairline border, the shopper's are solid navy, and the typing indicator is three dots at the
 panel's own rhythm.
 
+## The photography
+
+The pack's product shots arrive pillarboxed: a white or black frame around the garment, at a
+dozen different sizes. Serving those straight into a grid gave every third tile a black
+border and made the page look broken rather than designed. The API now trims the dead bars
+off a photo the first time it is asked for and caches the result, so the tiles read as one
+set. Where the product itself is dark against a dark backdrop, the trim backs off and serves
+the original instead of cutting into the garment.
+
 ## Why it should help sales
 
 - The hero gives a first-time visitor two doors — browse, or ask — and the second one is the

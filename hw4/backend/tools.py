@@ -24,12 +24,15 @@ MAX_CARDS = 8
 MAX_AUDIT_FIELD = 220
 CATALOGUE_TTL_SECONDS = 60
 
+# A single description word in common is not a match; a name, type, tag or colour hit is.
+MIN_SCORE = 2.0
+
 # Shopper words on the left, catalogue words on the right.
 CATEGORY_SYNONYMS = {
-    "hoodie": ("hoodie", "hood", "hooded", "pullover"),
-    "hoodies": ("hoodie", "hood", "hooded", "pullover"),
-    "sweatshirt": ("sweatshirt", "crewneck", "hooded"),
-    "sweatshirts": ("sweatshirt", "crewneck", "hooded"),
+    "hoodie": ("hoodie", "hood", "hooded"),
+    "hoodies": ("hoodie", "hood", "hooded"),
+    "sweatshirt": ("sweatshirt", "crewneck"),
+    "sweatshirts": ("sweatshirt", "crewneck"),
     "crewneck": ("crewneck", "sweatshirt"),
     "crewnecks": ("crewneck", "sweatshirt"),
     "tee": ("t-shirt", "tee", "shirt"),
@@ -129,18 +132,20 @@ def expand(words: Iterable[str]) -> set[str]:
 
 
 def score_product(query_words: set[str], product: dict[str, Any]) -> float:
-    """Weight a name hit above a category hit above a description hit."""
+    """Weight a name hit above a category or tag hit, above colour, above the description."""
     if not query_words:
         return 0.0
     name_words = set(tokens(product["name"]))
-    category_words = expand(tokens(f"{product.get('category','')}"))
-    colour_words = set(tokens(product.get("color", "")))
+    category_words = expand(tokens(f"{product.get('category', '')} {product.get('garment_type', '')}"))
+    tag_words = expand(tokens(" ".join(product.get("tags", []))))
+    colour_words = set(tokens(" ".join(product.get("colors", [])) or product.get("color", "")))
     description_words = set(tokens(product.get("description", "")))
 
     score = 0.0
     score += 3.0 * len(query_words & name_words)
     score += 2.0 * len(query_words & category_words)
-    score += 1.5 * len(query_words & colour_words)
+    score += 2.0 * len(query_words & tag_words)
+    score += 2.0 * len(query_words & colour_words)
     score += 0.5 * len(query_words & description_words)
 
     joined = product["name"].lower()
@@ -165,7 +170,7 @@ def to_card(product: dict[str, Any], in_stock: bool = True) -> ProductCard:
     )
 
 
-def has_stock(product_id: int) -> bool:
+def has_stock(product_id: str) -> bool:
     sizes = db.stock_for(product_id)
     return any(size["quantity"] > 0 for size in sizes) if sizes else True
 
@@ -180,9 +185,9 @@ def best_match(query: str) -> dict[str, Any] | None:
     return ranked[0][1]
 
 
-def resolve_product(query: str | None, product_id: int | None) -> dict[str, Any] | None:
+def resolve_product(query: str | None, product_id: str | None) -> dict[str, Any] | None:
     if product_id:
-        found = db.product_by_id(int(product_id))
+        found = db.product_by_id(str(product_id))
         if found:
             return found
     if query:
@@ -194,7 +199,7 @@ def rank_products(query: str, limit: int) -> tuple[list[ProductCard], int]:
     """Score every product against a phrase. Used by the agent tool and by the site search."""
     query_words = expand(tokens(query))
     ranked = [(score_product(query_words, product), product) for product in catalogue_snapshot()]
-    ranked = [pair for pair in ranked if pair[0] > 0]
+    ranked = [pair for pair in ranked if pair[0] >= MIN_SCORE]
     ranked.sort(key=lambda pair: (-pair[0], pair[1]["price"]))
     cards = [to_card(product, has_stock(product["product_id"])) for _, product in ranked[:limit]]
     return cards, len(ranked)
@@ -217,7 +222,7 @@ def search_catalogue(query: str, limit: int = MAX_CARDS, *, run_id: str = "-") -
     return result
 
 
-def product_detail(query: str | None = None, product_id: int | None = None, *, run_id: str = "-") -> ProductDetail:
+def product_detail(query: str | None = None, product_id: str | None = None, *, run_id: str = "-") -> ProductDetail:
     """Description, price and colour for one product, looked up by name or by id."""
     started = time.monotonic()
     product = resolve_product(query, product_id)
@@ -230,7 +235,7 @@ def product_detail(query: str | None = None, product_id: int | None = None, *, r
             stop_reason="not_found",
             duration_ms=int((time.monotonic() - started) * 1000),
         )
-        return ProductDetail(product_id=0, name=str(query or ""), price=0.0, found=False)
+        return ProductDetail(product_id="", name=str(query or ""), price=0.0, found=False)
 
     detail = ProductDetail(
         product_id=product["product_id"],
@@ -256,7 +261,7 @@ def product_detail(query: str | None = None, product_id: int | None = None, *, r
 def stock_report(
     query: str | None = None,
     size: str | None = None,
-    product_id: int | None = None,
+    product_id: str | None = None,
     *,
     run_id: str = "-",
 ) -> StockReport:
@@ -272,7 +277,7 @@ def stock_report(
             stop_reason="not_found",
             duration_ms=int((time.monotonic() - started) * 1000),
         )
-        return StockReport(product_id=0, name=str(query or ""), price=0.0, found=False, checked_size=size)
+        return StockReport(product_id="", name=str(query or ""), price=0.0, found=False, checked_size=size)
 
     rows = db.stock_for(product["product_id"])
     wanted = (size or "").strip().upper()

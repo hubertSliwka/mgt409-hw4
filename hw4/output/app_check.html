@@ -79,8 +79,9 @@
       <header>
         <h1>Campus Customs — site test</h1>
         <p class="sub">
-          Six checks run against the live site, driven end to end in Chrome by
-          <code>frontend/scripts/capture_app_check.mjs</code>. Every screenshot below is one of those runs.
+          Six checks run against the live site with the course data pack in place, driven end to end in
+          Chrome by <code>frontend/scripts/capture_app_check.mjs</code>. Every screenshot below is one of
+          those runs.
         </p>
         <div class="facts">
           <div><span>Front end</span> Vite + React + TypeScript, http://localhost:5173</div>
@@ -94,29 +95,29 @@
         <h2><small>Check 1 — required</small>Chat checking the inventory level of an item</h2>
         <div>
           <figure>
-            <img src="app_check_images/chat_inventory.png" alt="Chat answering a size question on the Yale pullover hoodie product page" />
+            <img src="app_check_images/chat_inventory.png" alt="Chat answering a size question on the Crew Left Chest Hoodie page" />
             <figcaption>
-              Product page for item #17 open, the shopper asks “do you have this in M?” in the panel at
-              the bottom right.
+              The product page for <code>crew-left-chest-hoodie</code> is open and the shopper asks
+              “do you have this in M?” in the panel at the bottom right.
             </figcaption>
           </figure>
           <p class="proves">
-            The assistant answers “The Yale pullover hoodie is out of stock in M. It’s currently
-            available in S, L, and XL.” It knew which product “this” meant from the page context, and
-            the answer came from the <code>inventory</code> table — the “from our stock list” tag under
-            the bubble is set only when a tool supplied the facts.
+            The assistant answers “This hoodie is out of stock in M. It’s available in XS, S, L, XL, and
+            XXL.” It knew which product “this” meant from the page context, and the sizes came from the
+            <code>inventory</code> table — the “from our stock list” tag under the bubble is only set when a
+            tool supplied the facts. The size row behind it agrees: M is struck through and unclickable.
           </p>
           <table>
             <thead>
               <tr><th>Size</th><th>quantity in campus_customs.db</th><th>What the chat said</th></tr>
             </thead>
             <tbody>
-              <tr><td>XS</td><td class="zero">0</td><td>not offered</td></tr>
-              <tr><td>S</td><td>5</td><td>available</td></tr>
+              <tr><td>XS</td><td>20</td><td>available</td></tr>
+              <tr><td>S</td><td>12</td><td>available</td></tr>
               <tr><td>M</td><td class="zero">0</td><td>out of stock</td></tr>
-              <tr><td>L</td><td>9</td><td>available</td></tr>
-              <tr><td>XL</td><td>7</td><td>available</td></tr>
-              <tr><td>XXL</td><td class="zero">0</td><td>not offered</td></tr>
+              <tr><td>L</td><td>8</td><td>available</td></tr>
+              <tr><td>XL</td><td>20</td><td>available</td></tr>
+              <tr><td>XXL</td><td>5</td><td>available</td></tr>
             </tbody>
           </table>
         </div>
@@ -135,8 +136,8 @@
           <p class="proves">
             This is the Problem 7 contract working: the agent called <code>search_products</code>, returned
             structured matches in <code>ShopReply.products</code>, and the front end drew them with the same
-            tile component the grid uses. Every card was re-read from the database by
-            <code>product_id</code> before rendering, and clicking one opens that item’s single-item page.
+            tile component the grid uses. Every card was re-read from the database by its catalogue slug
+            before rendering, and clicking one opens that item’s single-item page.
           </p>
         </div>
       </section>
@@ -147,15 +148,16 @@
           <figure>
             <img src="app_check_images/usability_filters.png" alt="Products page filtered to hoodies matching navy" />
             <figcaption>
-              Products page with “navy” typed into the search box and the <strong>Hoodie</strong> category
-              chip selected: 24 items, all hoodies.
+              Products page with “navy” typed into the search box and the <strong>Hoodie</strong> chip
+              selected, so only navy hoodies are left in the grid.
             </figcaption>
           </figure>
           <p class="proves">
             Improvement 1 from <code>usability.md</code>. The search is debounced by 220 ms and the grid shows
             shimmering skeleton tiles while the request is in flight, so a 102-product catalogue stays
-            navigable and the page never flashes blank. Category, sort and “in stock only” all narrow the
-            same result set.
+            navigable and the page never flashes blank. The chips are built by folding the pack’s 22
+            free-text garment types into six shopping categories; category, sort and “in stock only” all
+            narrow the same result set.
           </p>
         </div>
       </section>
@@ -164,16 +166,16 @@
         <h2><small>Check 4</small>Single-item page with real per-size stock</h2>
         <div>
           <figure>
-            <img src="app_check_images/product_detail_sizes.png" alt="Product detail page with sold-out sizes struck through" />
+            <img src="app_check_images/product_detail_sizes.png" alt="Product detail page with the sold-out size struck through" />
             <figcaption>
-              Item #17: large image on one side, full product text on the other, and a size row built from
-              the inventory table.
+              Large photo on one side, full product text on the other, and a size row built from the
+              inventory table.
             </figcaption>
           </figure>
           <p class="proves">
-            XS, M and XXL are struck through and unclickable because their quantity is zero; S is selected
-            and the line under the row reads “5 in stock in S.” This is the page that both a grid tile and a
-            chat card open, and it is where the agent gets its page context from.
+            M is struck through and unclickable because its quantity is zero; XS is selected and the line
+            under the row reads “20 in stock in XS.” This is the page that both a grid tile and a chat card
+            open, and it is where the agent gets its page context from.
           </p>
         </div>
       </section>
@@ -184,14 +186,14 @@
           <figure>
             <img src="app_check_images/login_memory.png" alt="Chat after signing in, recalling an earlier message" />
             <figcaption>
-              Signed in as the test account, the shopper says they wear a large. The whole site is then
-              reloaded, and they ask “what size did I say I wear?”
+              Signed in as the supplied test account, the shopper says they wear a large. The whole site is
+              then reloaded, and they ask “what size did I say I wear?”
             </figcaption>
           </figure>
           <p class="proves">
-            The transcript above the new question was re-read from <code>chat_messages</code> after the reload,
-            not held in the browser, and the agent answers “You said you wear a large (L).” The header shows
-            “Signed in as Test”, which is the customer identity the agent receives in its deps.
+            The transcript above the new question was re-read from <code>chat_messages</code> after the
+            reload, not held in the browser, and the agent answers “You said you wear a large (L).” The
+            header shows “Signed in as Test”, which is the customer identity the agent receives in its deps.
           </p>
         </div>
       </section>
@@ -205,7 +207,8 @@
           </figure>
           <p class="proves">
             The nav links to Home, Products, About Us, Log in and Create account, and the chat launcher sits
-            in the bottom right on every page.
+            in the bottom right on every page. The product photos are served through the trimming step, so
+            the pack’s black letterbox bars do not reach the grid.
           </p>
         </div>
       </section>
