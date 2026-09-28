@@ -1456,5 +1456,104 @@
     "result": "{\"cards\": 0, \"source\": \"database\", \"request_tokens\": 4347, \"response_tokens\": 248}",
     "stop_reason": "ok",
     "duration_ms": 4706
+  },
+  {
+    "time": "2026-09-28T01:00:07+00:00",
+    "run_id": "6ae9b072ea7f",
+    "tool": "search_catalogue",
+    "args": "{\"query\": \"quarter zips\", \"limit\": 6}",
+    "result": "{\"total_found\": 12, \"returned\": 6}",
+    "stop_reason": "capped",
+    "duration_ms": 18
+  },
+  {
+    "time": "2026-09-28T01:00:11+00:00",
+    "run_id": "6ae9b072ea7f",
+    "tool": "agent.run",
+    "args": "{\"message\": \"what quarter zips do you have?\", \"page\": \"products\", \"product_id\": null}",
+    "result": "{\"cards\": 6, \"source\": \"database\", \"request_tokens\": 3792, \"response_tokens\": 653}",
+    "stop_reason": "ok",
+    "duration_ms": 10658
+  },
+  {
+    "time": "2026-09-28T01:23:54+00:00",
+    "run_id": "0bcb897bc183",
+    "tool": "search_catalogue",
+    "args": "{\"query\": \"hoodies\", \"limit\": 6}",
+    "result": "{\"total_found\": 27, \"returned\": 6}",
+    "stop_reason": "capped",
+    "duration_ms": 27
+  },
+  {
+    "time": "2026-09-28T01:23:54+00:00",
+    "run_id": "0bcb897bc183",
+    "tool": "agent.run",
+    "args": "{\"message\": \"what hoodies do you have?\", \"page\": \"products\", \"product_id\": null}",
+    "result": "{\"cards\": 6, \"source\": \"database\", \"request_tokens\": 3762, \"response_tokens\": 600}",
+    "stop_reason": "ok",
+    "duration_ms": 5897
+  },
+  {
+    "time": "2026-09-28T01:23:54+00:00",
+    "run_id": "2d9f6d30673e",
+    "tool": "stock_report",
+    "args": "{\"query\": null, \"size\": \"M\", \"product_id\": \"crew-left-chest-hoodie\"}",
+    "result": "{\"product_id\": \"crew-left-chest-hoodie\", \"total_units\": 0, \"sizes\": 1}",
+    "stop_reason": "ok",
+    "duration_ms": 4
+  },
+  {
+    "time": "2026-09-28T01:23:55+00:00",
+    "run_id": "2d9f6d30673e",
+    "tool": "stock_report",
+    "args": "{\"query\": null, \"size\": null, \"product_id\": \"crew-left-chest-hoodie\"}",
+    "result": "{\"product_id\": \"crew-left-chest-hoodie\", \"total_units\": 65, \"sizes\": 6}",
+    "stop_reason": "ok",
+    "duration_ms": 5
+  },
+  {
+    "time": "2026-09-28T01:23:55+00:00",
+    "run_id": "2d9f6d30673e",
+    "tool": "agent.run",
+    "args": "{\"message\": \"do you have this in M?\", \"page\": \"product\", \"product_id\": \"crew-left-chest-hoodie\"}",
+    "result": "{\"cards\": 0, \"source\": \"database\", \"request_tokens\": 5200, \"response_tokens\": 267}",
+    "stop_reason": "ok",
+    "duration_ms": 857
+  },
+  {
+    "time": "2026-09-28T01:23:57+00:00",
+    "run_id": "776c5c11b95f",
+    "tool": "search_catalogue",
+    "args": "{\"query\": \"maroon\", \"limit\": 6}",
+    "result": "{\"total_found\": 0, \"returned\": 0}",
+    "stop_reason": "empty",
+    "duration_ms": 7
+  },
+  {
+    "time": "2026-09-28T01:24:00+00:00",
+    "run_id": "776c5c11b95f",
+    "tool": "agent.run",
+    "args": "{\"message\": \"do you have anything in maroon?\", \"page\": \"products\", \"product_id\": null}",
+    "result": "{\"cards\": 0, \"source\": \"database\", \"request_tokens\": 3993, \"response_tokens\": 126}",
+    "stop_reason": "ok",
+    "duration_ms": 4631
+  },
+  {
+    "time": "2026-09-28T01:25:13+00:00",
+    "run_id": "4ab50303fb62",
+    "tool": "product_detail",
+    "args": "{\"query\": \"account sign-in\", \"product_id\": null}",
+    "result": "no catalogue match",
+    "stop_reason": "not_found",
+    "duration_ms": 11
+  },
+  {
+    "time": "2026-09-28T01:25:16+00:00",
+    "run_id": "4ab50303fb62",
+    "tool": "agent.run",
+    "args": "{\"message\": \"hi, who am I signed in as?\", \"page\": \"products\", \"product_id\": null}",
+    "result": "{\"cards\": 0, \"source\": \"general\", \"request_tokens\": 3309, \"response_tokens\": 368}",
+    "stop_reason": "ok",
+    "duration_ms": 8060
   }
 ]

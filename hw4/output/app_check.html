@@ -79,7 +79,7 @@
       <header>
         <h1>Campus Customs — site test</h1>
         <p class="sub">
-          Six checks run against the live site with the course data pack in place, driven end to end in
+          Seven checks run against the live site with the course data pack in place, driven end to end in
           Chrome by <code>frontend/scripts/capture_app_check.mjs</code>. Every screenshot below is one of
           those runs.
         </p>
@@ -199,7 +199,29 @@
       </section>
 
       <section>
-        <h2><small>Check 6</small>Storefront home</h2>
+        <h2><small>Check 6</small>Create account, then log back in</h2>
+        <div>
+          <figure>
+            <img src="app_check_images/new_account.png" alt="Signed in as a newly created account, with the chat confirming who is signed in" />
+            <figcaption>
+              A brand-new account was created through the form, signed out, and signed back in with the
+              same email and password. The chat is asked who it is talking to.
+            </figcaption>
+          </figure>
+          <p class="proves">
+            The nav reads “Hi, Hubert” and the assistant answers “You’re signed in as Hubert Sliwka
+            (hubert.…@yale.edu)” — the customer identity reaches the agent through its deps, resolved from
+            the session token rather than from anything the browser claims. The same run also confirmed the
+            form refuses a mismatched confirm-password before anything is sent, and that the supplied
+            <code>test@campuscustoms.yale.edu</code> account still logs in. In the database the new row is a
+            <code>$2b$12$…</code> bcrypt digest, while the pack’s own PBKDF2 rows are left exactly as they
+            were written.
+          </p>
+        </div>
+      </section>
+
+      <section>
+        <h2><small>Check 7</small>Storefront home</h2>
         <div>
           <figure>
             <img src="app_check_images/home.png" alt="Campus Customs home page" />
