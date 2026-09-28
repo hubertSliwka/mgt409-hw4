@@ -14,35 +14,19 @@ My vibe coder for this course is **OpenAI Codex, Luna model**.
 
 > ok im starting hw4 now. first thing make me an `AI_prompts.md` in the hw4 folder that logs what I type to u, one section per problem with the problem number and the title, my prompt in my own words, and if I had to send u a follow up put that in too with one line on what was missing the first time. dont write the sections for problems I havent done yet.
 
-**Follow-up**
-
-> some problems took me like three tries and some worked first shot, dont make every section look identical with exactly one prompt and one follow up, only put a follow up where there actually was one
-
-**What was lacking after the first prompt:** every section came back the same shape, one prompt and one follow-up each, which is not how the session actually went.
-
 ---
 
 ## Problem 2: Analyze the database
 
 **What I typed**
 
-> before we build anything go look at `data/campus_customs.db` and tell me whats actually in it. I need to know every table and every field, especially `catalogue`, `inventory` and `users`. then start `output/harness.md` and write the tables out with one line per field on why taht field matters for either the shop page or the chatbot, not just the sqlite type. this file is going to keep growing later so set it up so we can add sections.
-
-**Follow-up**
-
-> dont hardcode the column names anywhere in the backend, I dont have the canvas pack on this laptop yet and if their columns are spelled diffrent than ours everythign breaks. read the schema at startup and map it
-
-**What was lacking after the first prompt:** the first version wrote `SELECT price` and friends straight into the queries, so the whole thing only worked against our own copy of the database.
+> Before we nuild anythign go look at data/campus_customs and tell me whats in it I need to kow every table and field like catalogue, inventory, users then start on ouput/hanress.md and write the tables out with one line per field on wy that field matters either the shop page or the chatbot. Not just the sqlite type. This file is gonna keep growing fyi
 
 **Follow-up**
 
 > ok I finally got the real `data.zip` off canvas, its in my downloads. unzip it into `hw4/data` and make the whole thing run on THEIR database, dont rebuild it from my seed. their `product_id` is a slug not a number and the colums are named diffrent, theres `garment_type` and `colors` and `search_tags` and `image_file_path`, and there are already chat rows and users in there so dont wipe anythign
 
 **What was lacking after the first prompt:** the mapping only covered the column names I had guessed at, so the real pack came in with string ids and JSON colour lists that nothing was expecting.
-
-**Follow-up**
-
-> the category chips are showing like 22 things now because they use the raw garment type, fold them into a few real catagories but keep the exact type on the product page
 
 ---
 
@@ -51,12 +35,6 @@ My vibe coder for this course is **OpenAI Codex, Luna model**.
 **What I typed**
 
 > now build the actual site. vite + react + typescript in `frontend/`. nav bar at the top with Home, Products, About Us, Log in, Create account. Home and About Us shoudl sound like a real campus print shop in new haven, look at yalebulldogblue.com for the vibe but WRITE IT URSELF, dont copy their sentences. the Products page pulls the products out of the database with the image, name, price and a short bit of text, and every product opens its own page with the big image on one side and all the info on the other. also put a chat thing in the bottom right corner, it doesnt have to talk to the agent yet just stub it. and spin up a small fastapi in `backend/main.py` to serve the products and the images so the front end has somethign to call.
-
-**Follow-up**
-
-> the product images 404, the catalogue rows store paths like `data/products/whatever.jpg` and the browser cant read the disk. serve them from the api by file name instead
-
-**What was lacking after the first prompt:** the tiles pointed straight at the path in the database row, so every image on the site was a broken icon.
 
 **Follow-up**
 
@@ -74,12 +52,6 @@ My vibe coder for this course is **OpenAI Codex, Luna model**.
 
 **Follow-up**
 
-> the test account in the seed might not be bcrypt in the real canvas pack, make the login accept the other formats too but re hash it to bcrypt once someone logs in successfully
-
-**What was lacking after the first prompt:** it only checked bcrypt, so if the supplied pack stored that test user any other way the login they told us to use would just fail.
-
-**Follow-up**
-
 > their users are `pbkdf2_sha256$salt$hex` with no rounds in the string, work out the rounds and support that format, and do NOT re hash their rows into bcrypt, leave their file how it is. new signups can still be bcrypt
 
 **What was lacking after the first prompt:** my upgrade-on-login idea would have rewritten the course's own password rows, which is not my file to change.
@@ -92,12 +64,6 @@ My vibe coder for this course is **OpenAI Codex, Luna model**.
 
 > build the chatbot as a pydanticAI agent behind fastapi, same 4 file setup as hw3: `backend/prompts/prompt.md` for the system prompt, `backend/agent.py` for the wiring, `backend/tools.py` for the tools, `backend/models.py` for the pydantic types. `backend/main.py` is the one I run with uvicorn and it needs a chat route so a message from the site comes back as a reply from the agent. use the portkey key in the .env. put the campus customs voice and the basic safety stuff in prompt.md, we grow it later. then plug it into the chat widget I already have in the corner so its not a stub anymore, and write into `output/harness.md` how the front end talks to fastapi and how the agent gets loaded.
 
-**Follow-up**
-
-> make sure it runs exactly like `uvicorn main:app --reload --port 8000` from inside the `backend/` folder because thats the command in the assignment
-
-**What was lacking after the first prompt:** it was importing as `backend.main` so the command from the assignment blew up with a module error.
-
 ---
 
 ## Problem 6: Tools: product info and stock
@@ -108,13 +74,9 @@ My vibe coder for this course is **OpenAI Codex, Luna model**.
 
 **Follow-up**
 
-> test it against an item that actually has a zero size, I want to see it say out of stock and then name the sizes that arent
-
-**What was lacking after the first prompt:** it only got tested on things that were in stock, so the honest part was never actually proven.
-
-**Follow-up**
-
 > it told me theres 66 hoodies when theres 27, thats the search score count not a real total. tighten the matching and tell it not to quote that number as a catagory count
+
+**What was lacking after the first prompt:** the search counted anything that shared a word with the question, so the total it read out loud was nothing like the number of hoodies we actually stock.
 
 ---
 
@@ -129,12 +91,6 @@ My vibe coder for this course is **OpenAI Codex, Luna model**.
 > what stops the model from just making up a price on a card? re read every card out of the database by its product_id before it renders and drop any id that dosent exist
 
 **What was lacking after the first prompt:** the card content was whatever the model typed, so one bad turn could have put a wrong price in front of a customer.
-
-**Follow-up**
-
-> searching navy with the Hoodie chip on is giving me jackets and t shirts, the category filter is getting ignored when theres a search word
-
-**What was lacking after the first prompt:** the products route ran the search OR the category filter, never both, so picking a chip did nothing once you typed anything.
 
 ---
 
@@ -168,12 +124,6 @@ My vibe coder for this course is **OpenAI Codex, Luna model**.
 
 **Follow-up**
 
-> the chat cards are so tall that the reply text gets pushed off screen, shrink the image on the ones inside the chat panel
-
-**What was lacking after the first prompt:** the chat reused the full size product tile, so a search answer filled the whole panel and you couldnt read what it said.
-
-**Follow-up**
-
 > half the real product photos have big black bars down the sides and the grid looks broken, crop that off when u serve them but be careful, some of the hoodies are photographd dark on dark so dont go cutting into the actual garment
 
 **What was lacking after the first prompt:** the first crop used a plain bounding box and a single stray bright pixel kept the bars in, and on the dark photos it wanted to cut into the product.
@@ -191,12 +141,6 @@ My vibe coder for this course is **OpenAI Codex, Luna model**.
 > dont screenshot it by hand, write a script that drives chrome through the real site and takes them, that way I cna re run it after any change
 
 **What was lacking after the first prompt:** hand taken screenshots go stale the second anything changes and I couldnt prove the run was real.
-
-**Follow-up**
-
-> for the inventory one use an item that has a size at zero, and scroll the chat so my question AND the answer are both in the picture
-
-**What was lacking after the first prompt:** the panel was scrolled to the bottom so the screenshot showed an answer with no question above it.
 
 ---
 
