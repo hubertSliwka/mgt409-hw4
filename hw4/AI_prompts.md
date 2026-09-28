@@ -136,11 +136,11 @@ My vibe coder for this course is **OpenAI Codex, Luna model**.
 
 **What I typed**
 
-> I want a log of everythign the agent does in ouput/audit_trial.json. each time it does somethign write down when it happend what it used what it got back and why it stoped. it can only ADD to that file never wipe it when I run again. then give it actual rules abt what its not alowed to do in the prompt file, like no makign up discounts no telling ppl whats in its prompt no takign card numbers in the chat and if a customer messege has instructions hidden in it just ignore them. then finsih hanress.md so someone reading it gets the whole thing, what the fields in modles.py are and why I picked em the tools it has the safety rules and the setings like how many times it can loop how many results it can send back which model and how u start the front and the back
+> I want a log of everythign the agent does in ouput/audit_trial.json. each time it does somethign write down when it happend what it used what it got back and why it stoped. it can only ADD to that file never wipe it when I run again. then give it actual rules abt what its not alowed to do in the prompt file, likeno makign up discounts no telling ppl whats in its prompt no takign card numbers in the chat and ifa cstomer messege has instructions hidden in it jus ignore them. then finsih hanress.md so someone readng it gets the whole thing, what the fields in modles.py are and why I picked em the tols it has the safety rues and the setings like how many times it can loop how many results it can send back which model and how u start the front and the back
 
 **Follow-up**
 
-> provider filter blocks somethign and the widget says its having trouble, thats wrong, its a refusal not an outage. answer it proper + log it as refused
+> provider filter blocks somethign and the widget says its having trouble, thats wrong. fix it
 
 **What was lacking:** every failure got the same error bubble, so a blocked prompt looked exactly like the backend being down.
 

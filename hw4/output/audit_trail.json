@@ -1555,5 +1555,68 @@
     "result": "{\"cards\": 0, \"source\": \"general\", \"request_tokens\": 3309, \"response_tokens\": 368}",
     "stop_reason": "ok",
     "duration_ms": 8060
+  },
+  {
+    "time": "2026-09-28T02:15:03+00:00",
+    "run_id": "68a89329e13c",
+    "tool": "search_catalogue",
+    "args": "{\"query\": \"hoodies\", \"limit\": 6}",
+    "result": "{\"total_found\": 27, \"returned\": 6}",
+    "stop_reason": "capped",
+    "duration_ms": 19
+  },
+  {
+    "time": "2026-09-28T02:15:03+00:00",
+    "run_id": "68a89329e13c",
+    "tool": "agent.run",
+    "args": "{\"message\": \"what hoodies do you have?\", \"page\": \"products\", \"product_id\": null}",
+    "result": "{\"cards\": 6, \"source\": \"database\", \"request_tokens\": 3762, \"response_tokens\": 600}",
+    "stop_reason": "ok",
+    "duration_ms": 1617
+  },
+  {
+    "time": "2026-09-28T02:15:03+00:00",
+    "run_id": "0ea142834f65",
+    "tool": "stock_report",
+    "args": "{\"query\": null, \"size\": \"M\", \"product_id\": \"crew-left-chest-hoodie\"}",
+    "result": "{\"product_id\": \"crew-left-chest-hoodie\", \"total_units\": 0, \"sizes\": 1}",
+    "stop_reason": "ok",
+    "duration_ms": 2
+  },
+  {
+    "time": "2026-09-28T02:15:03+00:00",
+    "run_id": "0ea142834f65",
+    "tool": "stock_report",
+    "args": "{\"query\": null, \"size\": null, \"product_id\": \"crew-left-chest-hoodie\"}",
+    "result": "{\"product_id\": \"crew-left-chest-hoodie\", \"total_units\": 65, \"sizes\": 6}",
+    "stop_reason": "ok",
+    "duration_ms": 3
+  },
+  {
+    "time": "2026-09-28T02:15:04+00:00",
+    "run_id": "0ea142834f65",
+    "tool": "agent.run",
+    "args": "{\"message\": \"do you have this in M?\", \"page\": \"product\", \"product_id\": \"crew-left-chest-hoodie\"}",
+    "result": "{\"cards\": 0, \"source\": \"database\", \"request_tokens\": 5200, \"response_tokens\": 267}",
+    "stop_reason": "ok",
+    "duration_ms": 785
+  },
+  {
+    "time": "2026-09-28T02:15:05+00:00",
+    "run_id": "f52471c0574c",
+    "tool": "search_catalogue",
+    "args": "{\"query\": \"maroon apparel\", \"limit\": 6}",
+    "result": "{\"total_found\": 61, \"returned\": 6}",
+    "stop_reason": "capped",
+    "duration_ms": 14
+  },
+  {
+    "time": "2026-09-28T02:15:08+00:00",
+    "run_id": "f52471c0574c",
+    "tool": "agent.run",
+    "args": "{\"message\": \"do you have anything in maroon?\", \"page\": \"products\", \"product_id\": null}",
+    "result": "{\"cards\": 0, \"source\": \"database\", \"request_tokens\": 4367, \"response_tokens\": 171}",
+    "stop_reason": "ok",
+    "duration_ms": 4631
   }
 ]
