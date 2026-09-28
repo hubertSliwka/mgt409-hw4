@@ -64,7 +64,8 @@ agent work end to end. Drop the real pack in afterwards and it is used instead â
 adapts to whichever one is there.
 
 **2. Environment.** Copy `.env.example` to `.env` and set `PORTKEY_API_KEY` (or
-`OPENAI_API_KEY`) and a `SESSION_SECRET`.
+`OPENAI_API_KEY`) and a `SESSION_SECRET`. The backend reads `hw4/.env` and, if there is one,
+the `.env` in the folder above it, so the key can be kept outside this folder entirely.
 
 **3. Back end**, from the `backend/` folder:
 
