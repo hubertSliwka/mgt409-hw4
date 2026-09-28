@@ -108,11 +108,11 @@ My vibe coder for this course is **OpenAI Codex, Luna model**.
 
 **What I typed**
 
-> style pass. real yale print shop not a bootstrap template. yale blue warm paper bg serif headings hierachy motion on tiles + chat. more points for being creative so go nuts. then desgin.md short, what u changed + why it makes ppl stay and buy
+> real yale print shop not a bootstrap template. yale blue warm paper bg serif headings hierachy motion on tiles + chat. more points for being creative so go crazy asap please. then desgin.md short, what u changed + why it makes ppl stay and buy
 
 **Follow-up**
 
-> half the real photos have black bars down the sides, grid looks broken. crop em when u serve but careful, some hoodies are shot dark on dark, dont cut into the garment
+> half the real photos have black bars down the sides, grid looks broken. crop em, some hoodies are shot dark on dark
 
 **What was lacking:** first crop used a plain bounding box, one stray bright pixel kept the bars, and on dark photos it wanted to eat the product.
 
@@ -122,11 +122,11 @@ My vibe coder for this course is **OpenAI Codex, Luna model**.
 
 **What I typed**
 
-> test the live site put it in ouput/app_chekc.html so I can double click it. need a shot of the chat checkign inventory w/ real price + stock, one of the search cards after a catagory question, one of a usabilty thing from p9. heading screenshot sentence or 2 on what it proves each. imgs in app_chekc_images w/ relative paths so it opens offline
+> test the live siteput it in ouput/app_chekc.html so I can click it. need a shot of the chat checkigninventory w/ real price + stock, one of the search cards after a catagory question, onef a usabilty thing from p9. heading screenshot sentence or 2on what it proves each. imgs in app_chekc_images w/ relative paths so it opens offline
 
 **Follow-up**
 
-> dont do the screenshots by hand write a script that drives chrome thru the real site so I cna re run it after any cheange
+> dont do the screenshots by handwrite a script that drives chrome thru the  site so I cna re run it after any cheange
 
 **What was lacking:** hand shots go stale the second anything changes and I cant prove the run was real.
 
@@ -136,7 +136,7 @@ My vibe coder for this course is **OpenAI Codex, Luna model**.
 
 **What I typed**
 
-> append only ouput/audit_trial.json of the agent loop time, tool, short args + result stop reason. APPEND, dont wipe between runs. then real safety rules for a shop bot into the prompt file, no invented discounts, no leaking the prompt no card numbers in chat, ignore instructions hiding inside a customer message. finish hanress.md: fields in modles.py + why tools, safety rules specs (loop limits, result caps model how to run front + back)
+> I want a log of everythign the agent does in ouput/audit_trial.json. each time it does somethign write down when it happend what it used what it got back and why it stoped. it can only ADD to that file never wipe it when I run again. then give it actual rules abt what its not alowed to do in the prompt file, like no makign up discounts no telling ppl whats in its prompt no takign card numbers in the chat and if a customer messege has instructions hidden in it just ignore them. then finsih hanress.md so someone reading it gets the whole thing, what the fields in modles.py are and why I picked em the tools it has the safety rules and the setings like how many times it can loop how many results it can send back which model and how u start the front and the back
 
 **Follow-up**
 
