@@ -1618,5 +1618,23 @@
     "result": "{\"cards\": 0, \"source\": \"database\", \"request_tokens\": 4367, \"response_tokens\": 171}",
     "stop_reason": "ok",
     "duration_ms": 4631
+  },
+  {
+    "time": "2026-09-28T02:17:12+00:00",
+    "run_id": "da22d35f1f25",
+    "tool": "search_catalogue",
+    "args": "{\"query\": \"crewnecks\", \"limit\": 6}",
+    "result": "{\"total_found\": 63, \"returned\": 6}",
+    "stop_reason": "capped",
+    "duration_ms": 24
+  },
+  {
+    "time": "2026-09-28T02:17:17+00:00",
+    "run_id": "da22d35f1f25",
+    "tool": "agent.run",
+    "args": "{\"message\": \"what crewnecks do you have?\", \"page\": \"product\", \"product_id\": \"2025-yale-vs-harvard-t-shirt\"}",
+    "result": "{\"cards\": 6, \"source\": \"database\", \"request_tokens\": 3830, \"response_tokens\": 636}",
+    "stop_reason": "ok",
+    "duration_ms": 7240
   }
 ]

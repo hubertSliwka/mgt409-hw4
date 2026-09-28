@@ -58,10 +58,12 @@ pip install -r requirements.txt
 python scripts/seed_dev_data.py --data-dir data
 ```
 
-It writes the same four tables (`catalogue`, `inventory`, `users`, `chat_messages`) from
-`data/catalogue_seed.json` and draws a placeholder image per product, so every page and the
-agent work end to end. Drop the real pack in afterwards and it is used instead — the backend
-adapts to whichever one is there.
+It writes the same four tables (`catalogue`, `inventory`, `users`, `chat_messages`) and draws
+a placeholder image per product, so every page and the agent work end to end. It reads its
+product list from `data/catalogue_seed.json`, which lives under the gitignored `data/` folder
+and is therefore not in this repository — with the course pack in place you do not need this
+path at all. Drop the real pack in afterwards and it is used instead; the backend adapts to
+whichever one is there.
 
 **2. Environment.** Copy `.env.example` to `.env` and set `PORTKEY_API_KEY` (or
 `OPENAI_API_KEY`) and a `SESSION_SECRET`. The backend reads `hw4/.env` and, if there is one,
