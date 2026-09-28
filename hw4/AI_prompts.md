@@ -28,7 +28,7 @@ My vibe coder for this course is **OpenAI Codex, Luna model**.
 
 **What I typed**
 
-> build the site now. vite react typescript in frotnend. navbar = Home Products About Us Log in Create account. home + about in MY OWN WORDS off yalebulldogblue.com dont copy them. Products pulls from the db, image name price lil bit of text, each one opens its own page, big img one side info the other. chat box bottom right, can be a stub. and a small fastapi in backend/mian.py so theres somethign to call for products + imgs
+> build the site now. vite react typescript in frotnend. navbar = Home Products About Us Log in Create account. home + about in MY OWN WORDS off yalebulldogblue.com dont copy them. Products pulls from the db, imgaename price lil bit of text, each oneopens own page, big img one side info the other. chat box bottom right, can be a stub. and a fastapi in backend/mian.py so theres somethign to call for products + imgs
 
 ---
 
@@ -36,13 +36,13 @@ My vibe coder for this course is **OpenAI Codex, Luna model**.
 
 **What I typed**
 
-> accounts. signup = first last email pw + confirm pw, login = email pw, new ones go inthe users table. hash them properly, bcrypt or equivelent, NOT plaintext NOT plain sha256, dont want a hacker or an AI reading that table. check I can log in as test@campuscustoms.yale.edu / password and that a new acct works too. how it works goes in ouput/hraness.md, what we store + how the pw is protected
+> accounts. signup = first last email pw + confirm pw, login = email pw, new ones go inthe users table. hash them properly, bcrypt or equivelent, NOT plaintext NOT plain sha256. check I can log in as test@campuscustoms.yale.edu / password and that a new acct works too. how it works goes in ouput/hraness.md, what we store + how the pw is protected
 
 **Follow-up**
 
-> their pws arent bcrypt, its pbkdf2 w/ the salt inthe middle and no rounds anywhere. figure the rounds out, accept it, DONT re hash their rows, leave their file alone. new signups can stay bcrypt
+> cant log in as the test user somethign isnt working. their passwords arent encrytped the same way ours are, theyre scrambled a totally diffrent way, figure out how and make the login work with theirs. and dont go changign the passwords already in their file, leave it how they gave it to me. ones I make can stay how we had it
 
-**What was lacking:** my rehash on login idea wouldve rewritten the courses own pw rows, not my file to touch.
+**What was lacking:** it only knew our own way of scrambling a password, so the login they told us to test with just kept failing.
 
 ---
 
